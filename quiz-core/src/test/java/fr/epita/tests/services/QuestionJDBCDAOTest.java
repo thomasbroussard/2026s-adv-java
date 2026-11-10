@@ -50,7 +50,6 @@ public class QuestionJDBCDAOTest {
         QuestionJDBCDAO questionJDBCDAO = new QuestionJDBCDAO();
         Question question = new Question();
         question.setTitle(questionTitle);
-        question.setId(questionId);
 
         //when
         questionJDBCDAO.create(question);
@@ -58,7 +57,7 @@ public class QuestionJDBCDAOTest {
         //then
         Connection connection = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "");
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM questions where id = ?");
-        preparedStatement.setLong(1, questionId);
+        preparedStatement.setLong(1, question.getId());
         ResultSet rs = preparedStatement.executeQuery();
         int size = 0;
         while(rs.next()) {
