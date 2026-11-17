@@ -1,24 +1,33 @@
-package fr.epita.quiz.services;
+package fr.epita.quiz.services.impl;
 import fr.epita.quiz.datamodel.Question;
+import fr.epita.quiz.services.api.IQuestionDAO;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public class QuestionJDBCDAO {
+public class QuestionJDBCDAO implements IQuestionDAO {
 
-    private static final String JDBC_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
-    private static final String JDBC_USER = "sa";
-    private static final String JDBC_PASSWORD = "";
 
-    public QuestionJDBCDAO() throws SQLException {
+    Supplier<Connection> connectionSupplier;
+
+    public QuestionJDBCDAO(final String url, final String user, final String password) throws SQLException {
+
+        connectionSupplier = () -> {
+            Connection connection = null;
+            try {
+                DriverManager.getConnection(url, user, password);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            return connection;
+        };
+
         initDatabase();
     }
 
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
-    }
 
     /**
      * Initializes the table without the body column.
@@ -31,7 +40,8 @@ public class QuestionJDBCDAO {
             );
         """;
 
-        try (Connection connection = getConnection();
+
+        try (Connection connection = connectionSupplier.get();
              Statement statement = connection.createStatement()) {
             statement.execute(sql);
         }
@@ -40,10 +50,11 @@ public class QuestionJDBCDAO {
     /**
      * Inserts a new Question with title only.
      */
+    @Override
     public Question create(Question question) throws SQLException {
         String sql = "INSERT INTO questions (title) VALUES (?)";
 
-        try (Connection connection = getConnection();
+        try (Connection connection = connectionSupplier.get();
              PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, question.getTitle());
@@ -61,10 +72,11 @@ public class QuestionJDBCDAO {
     /**
      * Finds a Question by primary key.
      */
+    @Override
     public Optional<Question> findById(Long id) throws SQLException {
         String sql = "SELECT id, title FROM questions WHERE id = ?";
 
-        try (Connection connection = getConnection();
+        try (Connection connection = connectionSupplier.get();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setLong(1, id);
@@ -81,11 +93,12 @@ public class QuestionJDBCDAO {
     /**
      * Retrieves all questions.
      */
+    @Override
     public List<Question> findAll() throws SQLException {
         String sql = "SELECT id, title FROM questions";
         List<Question> questions = new ArrayList<>();
 
-        try (Connection connection = getConnection();
+        try (Connection connection = connectionSupplier.get();
              Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
@@ -99,10 +112,11 @@ public class QuestionJDBCDAO {
     /**
      * Updates an existing Question's title.
      */
+    @Override
     public boolean update(Question question) throws SQLException {
         String sql = "UPDATE questions SET title = ? WHERE id = ?";
 
-        try (Connection connection = getConnection();
+        try (Connection connection = connectionSupplier.get();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setString(1, question.getTitle());
@@ -115,10 +129,11 @@ public class QuestionJDBCDAO {
     /**
      * Deletes a Question by primary key.
      */
+    @Override
     public boolean deleteById(Long id) throws SQLException {
         String sql = "DELETE FROM questions WHERE id = ?";
 
-        try (Connection connection = getConnection();
+        try (Connection connection = connectionSupplier.get();
              PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setLong(1, id);
