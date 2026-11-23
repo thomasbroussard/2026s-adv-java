@@ -1,21 +1,28 @@
 package fr.epita.tests.services;
 
 import fr.epita.quiz.datamodel.Question;
+import fr.epita.quiz.services.api.IQuestionDAO;
 import fr.epita.quiz.services.impl.QuestionJDBCDAO;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.sql.DataSource;
 import java.sql.*;
 
 public class QuestionJDBCDAOTest {
 
 
+    @Autowired
+    IQuestionDAO  questionJDBCDAO;
+
+    @Autowired
+    DataSource dataSource;
+
     @Test
     @DisplayName("AT001-When Creating a new Question From the DAO, it should persist in db")
     public void testCreateNewQuestion() throws SQLException {
-       //given
-        QuestionJDBCDAO questionJDBCDAO = new QuestionJDBCDAO("jdbc:h2:mem:test", "sa", "");
 
         Question question = new Question();
         question.setTitle("Depuis quand Paris s'appelle Paris ?");
@@ -25,7 +32,7 @@ public class QuestionJDBCDAOTest {
        questionJDBCDAO.create(question);
 
        //then
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "");
+        Connection connection = dataSource.getConnection();
         ResultSet rs = connection.prepareStatement("SELECT * FROM questions where id = 1").executeQuery();
         int size = 0;
         while(rs.next()) {
@@ -48,7 +55,6 @@ public class QuestionJDBCDAOTest {
     public void testCreateNewQuestionParameterized(String questionTitle, Long questionId) throws SQLException {
         //given
 
-        QuestionJDBCDAO questionJDBCDAO = new QuestionJDBCDAO("jdbc:h2:mem:test", "sa", "");
         Question question = new Question();
         question.setTitle(questionTitle);
 
@@ -56,7 +62,7 @@ public class QuestionJDBCDAOTest {
         questionJDBCDAO.create(question);
 
         //then
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "");
+        Connection connection = dataSource.getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM questions where id = ?");
         preparedStatement.setLong(1, question.getId());
         ResultSet rs = preparedStatement.executeQuery();
@@ -73,7 +79,7 @@ public class QuestionJDBCDAOTest {
     @AfterEach
     public void tearDown() throws SQLException {
         System.out.println("After each");
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "");
+        Connection connection = dataSource.getConnection();
         connection.prepareStatement("DELETE FROM questions").execute();
         connection.close();
     }
@@ -93,9 +99,8 @@ public class QuestionJDBCDAOTest {
     public void testUpdateQuestion() throws SQLException {
         //given
 
-        QuestionJDBCDAO questionJDBCDAO = new QuestionJDBCDAO("jdbc:h2:mem:test", "sa", "");
 
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "");
+        Connection connection = dataSource.getConnection();
         connection.prepareStatement("INSERT INTO questions (id, title) values (1, 'testquestion?')").execute();
         connection.close();
 

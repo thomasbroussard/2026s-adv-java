@@ -34,10 +34,11 @@ public class ServiceProvider {
         //TODO load from properties
         if (!servicesRegistry.containsKey(IQuestionDAO.class)) {
             try {
-                QuestionJDBCDAO dao = new QuestionJDBCDAO("jdbc:h2:mem:test", "sa", "");
+                //TODO fix
+                QuestionJDBCDAO dao = null; //new QuestionJDBCDAO("jdbc:h2:mem:test", "sa", "");
                 servicesRegistry.put(IQuestionDAO.class, dao);
                 return dao;
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

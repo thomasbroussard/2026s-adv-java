@@ -2,6 +2,7 @@ package fr.epita.quiz.services.impl;
 import fr.epita.quiz.datamodel.Question;
 import fr.epita.quiz.services.api.IQuestionDAO;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,17 +14,19 @@ public class QuestionJDBCDAO implements IQuestionDAO {
 
     Supplier<Connection> connectionSupplier;
 
-    public QuestionJDBCDAO(final String url, final String user, final String password) throws SQLException {
+    public QuestionJDBCDAO(DataSource dataSource) throws SQLException {
 
         connectionSupplier = () -> {
             Connection connection = null;
             try {
-                connection = DriverManager.getConnection(url, user, password);
+                connection = dataSource.getConnection();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
             return connection;
         };
+
+
 
         initDatabase();
     }
