@@ -16,4 +16,14 @@ public class TestConfiguration {
         return new QuestionJDBCDAO("jdbc:h2:mem:test", "sa", "");
 
     }
+
+    @Bean(name = "testString")
+    public String dummyQuestionTitle() {
+        return "testquestion?" ;
+    }
+
+    @Bean(name = "testString2")
+    public String dummyQuestionTitle2() {
+        return "testquestion?" ;
+    }
 }
