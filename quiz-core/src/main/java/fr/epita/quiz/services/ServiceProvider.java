@@ -18,7 +18,7 @@ public class ServiceProvider {
 
     private ServiceProvider() {
         serviceSuppliers.put(IQuestionDAO.class, this::getQuestionDAO);
-        serviceSuppliers.put(IExamDAO.class, this::getExamDAO);
+     //   serviceSuppliers.put(IExamDAO.class, this::getExamDAO);
     }
 
     public static ServiceProvider getInstance() {

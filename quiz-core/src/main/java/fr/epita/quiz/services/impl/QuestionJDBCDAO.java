@@ -18,7 +18,7 @@ public class QuestionJDBCDAO implements IQuestionDAO {
         connectionSupplier = () -> {
             Connection connection = null;
             try {
-                DriverManager.getConnection(url, user, password);
+                connection = DriverManager.getConnection(url, user, password);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
